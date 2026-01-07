@@ -13,8 +13,6 @@
       @mouseleave="isHover = false"
       @click="handleControlClick"
       @keydown="handleControlKeydown"
-      @focus="handleControlFocus"
-      @blur="handleControlBlur"
     >
       <div class="select-content">
         <!-- Selected Values Display -->
@@ -187,13 +185,16 @@
   const selectRef = ref<HTMLDivElement | null>(null)
   const searchInputRef = ref<HTMLInputElement | null>(null)
   const isOpen = ref(false)
-  const isFocused = ref(false)
   const isInputFocused = ref(false)
   const isHover = ref(false)
   const searchKeyword = ref('')
   const focusedIndex = ref(0)
   const dropdownRef = ref<HTMLDivElement | null>(null)
   const dropdownStyle = ref<Record<string, string>>({})
+
+  const isFocused = computed(() => {
+    return isOpen.value || isInputFocused.value
+  })
 
   // Normalize modelValue to array internally
   const selectedValues = computed<Array<string | number>>(() => {
@@ -313,15 +314,6 @@
     toggleDropdown()
   }
 
-  const handleControlFocus = () => {
-    isFocused.value = true
-  }
-
-  const handleControlBlur = () => {
-    isFocused.value = false
-    isOpen.value = false
-  }
-
   const handleValuesClick = (e: PointerEvent) => {
     if (props.showSearch && searchInputRef.value) {
       e.stopPropagation()
@@ -340,14 +332,12 @@
 
   const handleSearchFocus = () => {
     isInputFocused.value = true
-    isFocused.value = true
     isOpen.value = true
     initFocusedIndex()
   }
 
   const handleSearchBlur = () => {
     isInputFocused.value = false
-    isFocused.value = false
   }
 
   const clearSearchKeyword = () => {
@@ -681,12 +671,14 @@
     display: flex;
     align-items: center;
     min-width: 0;
-    position: relative; // Thêm này
+    position: relative;
   }
 
   .select-values {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
     width: 100%;
     min-height: 22px;
     position: relative;
@@ -723,15 +715,6 @@
     &::placeholder {
       color: #bfbfbf;
     }
-  }
-
-  .select-values {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 4px;
-    width: 100%;
-    min-height: 22px;
   }
 
   .single-value {
